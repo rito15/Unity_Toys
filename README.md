@@ -64,6 +64,7 @@
 
 <img src="https://user-images.githubusercontent.com/42164422/105009217-90b31780-5a7d-11eb-8feb-bf1062c91286.gif" width="500">
 
+- 렌더 텍스쳐의 해상도를 강제로 변경하여 픽셀화시킨다.
 - 카메라에 스크립트를 부착하여 사용
 
 - Reference
