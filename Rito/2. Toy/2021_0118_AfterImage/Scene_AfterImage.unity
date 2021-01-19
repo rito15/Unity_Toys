@@ -7550,7 +7550,7 @@ MonoBehaviour:
     m_NumColorKeys: 5
     m_NumAlphaKeys: 2
   _colorUpdateSpeed: 1
-  _bakingCycle: 0.505
+  _bakingCycle: 0.1
   _data:
     duration: 1
     shaderColorName: _Color
