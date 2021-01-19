@@ -55,7 +55,7 @@
 
 <img src="https://user-images.githubusercontent.com/42164422/104811469-05e4d980-583f-11eb-85b2-f1998fb35ec3.gif" width="500">
 
-- 출처
+- Reference
   - https://www.youtube.com/watch?v=rQG9aUWarwE [Sebastian Lague]
 
 #
@@ -66,7 +66,7 @@
 
 - 카메라에 스크립트를 부착하여 사용
 
-- 출처
+- Reference
   - https://www.youtube.com/watch?v=5rMkh9sl2bM [DH Studio]
   
   
