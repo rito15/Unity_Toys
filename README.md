@@ -1,7 +1,7 @@
 ## Unity Toys
 (2021. 01. 18 ~)
 
-------
+#
 
 # AfterImage (MotionTrail)
 - 사용법
@@ -25,6 +25,8 @@
 <img src="https://user-images.githubusercontent.com/42164422/104916473-76bdfa00-59d5-11eb-98b1-bcedfc89eb63.png" width="500">
 <img src="https://user-images.githubusercontent.com/42164422/104916494-7e7d9e80-59d5-11eb-9bff-71be140535ea.gif" width="500">
 
+#
+
 # Mesh Generators
 ## [1] Regular Polygon
 <img src="https://user-images.githubusercontent.com/42164422/104811800-62e18f00-5841-11eb-8fa5-2a82d7e79616.png" width="500">
@@ -46,7 +48,22 @@
 <img src="https://user-images.githubusercontent.com/42164422/104811363-3e37e800-583e-11eb-916f-ea45abb74c41.gif" width="500">
 <img src="https://user-images.githubusercontent.com/42164422/104811365-409a4200-583e-11eb-9d2e-5a34e10a1130.gif" width="500">
 
+#
+
 # Field of View
 <img src="https://user-images.githubusercontent.com/42164422/104811466-02e9e900-583f-11eb-84b4-18568724271a.gif" width="500">
 
 <img src="https://user-images.githubusercontent.com/42164422/104811469-05e4d980-583f-11eb-85b2-f1998fb35ec3.gif" width="500">
+
+#
+
+# Pixelate
+
+<img src="https://user-images.githubusercontent.com/42164422/105009217-90b31780-5a7d-11eb-8feb-bf1062c91286.gif" width="500">
+
+- 카메라에 스크립트를 부착하여 사용
+
+- 출처
+  - https://www.youtube.com/watch?v=5rMkh9sl2bM [DH Studio]
+  
+  
