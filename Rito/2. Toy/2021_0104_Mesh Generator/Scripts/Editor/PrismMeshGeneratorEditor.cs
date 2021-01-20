@@ -53,14 +53,14 @@ namespace Rito.MeshGenerator
             if (GUILayout.Button("Show Vertex"))
             {
                 selected._showVertexGizmo = !selected._showVertexGizmo;
-                FocusToSceneView();
+                FocusOnSceneView();
             }
 
             GUI.backgroundColor = selected._showEdgeGizmo ? Color.green : Color.black;
             if (GUILayout.Button("Show Edge"))
             {
                 selected._showEdgeGizmo = !selected._showEdgeGizmo;
-                FocusToSceneView();
+                FocusOnSceneView();
             }
             GUILayout.EndHorizontal();
 

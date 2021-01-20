@@ -11,7 +11,7 @@ namespace Rito.MeshGenerator
 {
     public static class MeshGeneratorEditorHelper
     {
-        public static void FocusToSceneView()
+        public static void FocusOnSceneView()
         {
             if (SceneView.sceneViews.Count > 0)
                 (SceneView.sceneViews[0] as SceneView).Focus();

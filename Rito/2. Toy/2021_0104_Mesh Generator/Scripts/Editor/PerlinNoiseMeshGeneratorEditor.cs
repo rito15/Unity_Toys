@@ -14,16 +14,16 @@ namespace Rito.MeshGenerator
     [CustomEditor(typeof(PerlinNoiseMeshGenerator))]
     public class PerlinNoiseMeshGeneratorEditor : UnityEditor.Editor
     {
-        public PerlinNoiseMeshGenerator selected;
+        public PerlinNoiseMeshGenerator pn;
 
         private void OnEnable()
         {
-            selected = AssetDatabase.Contains(target) ? null : (PerlinNoiseMeshGenerator)target;
+            pn = AssetDatabase.Contains(target) ? null : (PerlinNoiseMeshGenerator)target;
         }
 
         public override void OnInspectorGUI()
         {
-            if (selected == null)
+            if (pn == null)
                 return;
             Color oldTextColor = GUI.contentColor;
             Color oldBgColor = GUI.backgroundColor;
@@ -37,46 +37,49 @@ namespace Rito.MeshGenerator
             GUI.backgroundColor = oldBgColor;
         }
 
-        private void DrawPerlinProperties()
+        protected void DrawPerlinProperties()
         {
-            if (selected._resolution.x < 1)
-                selected._resolution = new Vector2Int(1, selected._resolution.y);
+            if (pn._resolution.x < 1)
+                pn._resolution = new Vector2Int(1, pn._resolution.y);
 
-            if (selected._resolution.y < 1)
-                selected._resolution = new Vector2Int(selected._resolution.x, 1);
+            if (pn._resolution.y < 1)
+                pn._resolution = new Vector2Int(pn._resolution.x, 1);
 
-            if (selected._width.x <= 0f)
-                selected._width = new Vector2(1f, selected._width.y);
+            if (pn._width.x <= 0f)
+                pn._width = new Vector2(1f, pn._width.y);
 
-            if (selected._width.y <= 0f)
-                selected._width = new Vector2(selected._width.x, 1f);
+            if (pn._width.y <= 0f)
+                pn._width = new Vector2(pn._width.x, 1f);
 
-            if (selected._maxHeight < selected._minHeight)
-                selected._maxHeight = selected._minHeight;
+            if (pn._maxHeight < pn._minHeight)
+                pn._maxHeight = pn._minHeight;
 
-            if (selected._noiseDensity < 0f)
-                selected._noiseDensity = 1f;
+            if (pn._noiseDensity < 0f)
+                pn._noiseDensity = 1f;
 
-            selected._resolution = EditorGUILayout.Vector2IntField("Resolution XY", selected._resolution);
-            selected._width = EditorGUILayout.Vector2Field("Width XY", selected._width);
-
-            EditorGUILayout.Space();
-            selected._minHeight = EditorGUILayout.FloatField("Min Height Limit", selected._minHeight);
-            selected._maxHeight = EditorGUILayout.FloatField("Max Height Limit", selected._maxHeight);
-            selected._noiseDensity = EditorGUILayout.FloatField("Noise Density", selected._noiseDensity);
+            pn._resolution = EditorGUILayout.Vector2IntField("Resolution XY", pn._resolution);
+            pn._width = EditorGUILayout.Vector2Field("Width XY", pn._width);
 
             EditorGUILayout.Space();
-            selected._randomize = EditorGUILayout.Toggle("Randomize", selected._randomize);
-            selected._addRandomSmallNoises = EditorGUILayout.Toggle("Add Random Small Noises", selected._addRandomSmallNoises);
+            pn._minHeight = EditorGUILayout.FloatField("Min Height Limit", pn._minHeight);
+            pn._maxHeight = EditorGUILayout.FloatField("Max Height Limit", pn._maxHeight);
+            pn._noiseDensity = EditorGUILayout.FloatField("Noise Density", pn._noiseDensity);
 
-            if (selected._addRandomSmallNoises)
+            EditorGUILayout.Space();
+            pn._randomSeed = EditorGUILayout.IntField("Random Seed", pn._randomSeed);
+
+            EditorGUILayout.Space();
+            pn._addRandomSmallNoises = EditorGUILayout.Toggle("Add Random Small Noises", pn._addRandomSmallNoises);
+
+            if (pn._addRandomSmallNoises)
             {
-                selected._smallNoiseRange =
-                    EditorGUILayout.Slider("Small Noise Range", selected._smallNoiseRange, 0.01f, 1.0f);
+                pn._randomSmallSeed = EditorGUILayout.IntField("Small Random Seed", pn._randomSmallSeed);
+                pn._smallNoiseRange =
+                    EditorGUILayout.Slider("Small Noise Range", pn._smallNoiseRange, 0.01f, 1.0f);
             }
         }
 
-        private void DrawPerlinButtons()
+        protected void DrawPerlinButtons()
         {
             GUIStyle btnWhiteFont = new GUIStyle(GUI.skin.button);
             btnWhiteFont.normal.textColor = Color.white;
@@ -85,24 +88,24 @@ namespace Rito.MeshGenerator
             GUI.backgroundColor = Color.blue;
             if (GUILayout.Button("Generate Mesh", btnWhiteFont))
             {
-                selected.GenerateMesh();
+                pn.GenerateMesh();
             }
 
             EditorGUILayout.Space();
             GUILayout.BeginHorizontal();
 
-            GUI.backgroundColor = selected._showVertexGizmo ? Color.green : Color.black;
+            GUI.backgroundColor = pn._showVertexGizmo ? Color.green : Color.black;
             if (GUILayout.Button("Show Vertex", btnWhiteFont))
             {
-                selected._showVertexGizmo = !selected._showVertexGizmo;
-                FocusToSceneView();
+                pn._showVertexGizmo = !pn._showVertexGizmo;
+                FocusOnSceneView();
             }
 
-            GUI.backgroundColor = selected._showEdgeGizmo ? Color.green : Color.black;
+            GUI.backgroundColor = pn._showEdgeGizmo ? Color.green : Color.black;
             if (GUILayout.Button("Show Edge", btnWhiteFont))
             {
-                selected._showEdgeGizmo = !selected._showEdgeGizmo;
-                FocusToSceneView();
+                pn._showEdgeGizmo = !pn._showEdgeGizmo;
+                FocusOnSceneView();
             }
             GUILayout.EndHorizontal();
         }

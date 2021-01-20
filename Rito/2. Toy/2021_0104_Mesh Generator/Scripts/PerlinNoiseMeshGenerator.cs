@@ -14,7 +14,9 @@ namespace Rito.MeshGenerator
         public float _maxHeight = 1f;
         public float _noiseDensity = 1f;
 
-        public bool _randomize = false;
+        public int _randomSeed = 0;
+        public int _randomSmallSeed = 0;
+
         public bool _addRandomSmallNoises = false;
         public float _smallNoiseRange = 0.1f;
 
@@ -31,14 +33,23 @@ namespace Rito.MeshGenerator
             verts = new Vector3[vertsCount];
             tris = new int[trisCount];
 
-            Vector2 randomOffset = Vector2.zero;
-            if (_randomize)
+            // Small Random
+            float[] randomSmallNoiseHeights = new float[vertsCount];
+            if (_addRandomSmallNoises)
             {
-                randomOffset = new Vector2(
-                    randomOffset.x + Random.Range(0.001f, 10.001f),
-                    randomOffset.y + Random.Range(11.001f, 31.001f)
-                );
+                Random.InitState(_randomSmallSeed);
+                for (int i = 0; i < randomSmallNoiseHeights.Length; i++)
+                {
+                    randomSmallNoiseHeights[i] = Random.Range(-_smallNoiseRange, _smallNoiseRange);
+                }
             }
+
+            // Ground Seed
+            Random.InitState(_randomSeed);
+            Vector2 randomOffset = new Vector2(
+                    Random.Range(0.001f, 10.001f),
+                    Random.Range(11.001f, 31.001f)
+                );
 
             // 1. 버텍스 초기화
             for (int j = 0; j < vCount.y; j++)
@@ -49,7 +60,9 @@ namespace Rito.MeshGenerator
                     verts[index] = startPoint
                         + new Vector3(
                             gridUnit.x * i,
-                            GetPerlinNoiseHeight(i, j, randomOffset),
+                            GetPerlinNoiseHeight(i, j, randomOffset)
+                            + (_addRandomSmallNoises ? randomSmallNoiseHeights[index] : 0f)
+                            ,
                             gridUnit.y * j
                         );
                 }
@@ -75,16 +88,13 @@ namespace Rito.MeshGenerator
                 }
             }
 
-            float GetPerlinNoiseHeight(int i, int j, Vector2 offset)
+            float GetPerlinNoiseHeight(int i, int j, Vector2 ranOffset)
             {
                 float a = i * 10f / _resolution.x;
                 float b = j * 10f / _resolution.y;
 
-                if (_randomize)
-                {
-                    a += offset.x;
-                    b += offset.y;
-                }
+                a += ranOffset.x;
+                b += ranOffset.y;
 
                 a *= _noiseDensity;
                 b *= _noiseDensity;
@@ -92,11 +102,6 @@ namespace Rito.MeshGenerator
                 float noiseHeight =
                     Mathf.PerlinNoise(a, b)
                     * (_maxHeight - _minHeight);
-
-                if (_addRandomSmallNoises)
-                {
-                    noiseHeight += Random.Range(-_smallNoiseRange, _smallNoiseRange);
-                }
 
                 float noise = _minHeight + noiseHeight;
 
