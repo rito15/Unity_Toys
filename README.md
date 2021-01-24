@@ -60,7 +60,7 @@
 
 #
 
-# Pixelate
+# Pixelater
 
 <img src="https://user-images.githubusercontent.com/42164422/105009217-90b31780-5a7d-11eb-8feb-bf1062c91286.gif" width="500">
 
