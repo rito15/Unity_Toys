@@ -70,4 +70,9 @@
 - Reference
   - https://www.youtube.com/watch?v=5rMkh9sl2bM [DH Studio]
   
-  
+#
+
+# Frame Rate Checker
+
+<img src="https://user-images.githubusercontent.com/42164422/105624478-6d191400-5e65-11eb-89ba-5a894dcfdce3.gif" width="500">
+
