@@ -7,15 +7,17 @@ using UnityEngine;
 // 작성자 : Rito
 
 [ExecuteInEditMode]
-public class PixelationCamera : MonoBehaviour
+public class Pixelater : MonoBehaviour
 {
     [Range(1, 100)]
-    public int pixelate = 1;
+    public int _pixelate = 1;
+
+    public bool _showGUI = true;
 
     private void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
         source.filterMode = FilterMode.Point;
-        RenderTexture resultTexture = RenderTexture.GetTemporary(source.width / pixelate, source.height / pixelate, 0, source.format);
+        RenderTexture resultTexture = RenderTexture.GetTemporary(source.width / _pixelate, source.height / _pixelate, 0, source.format);
         resultTexture.filterMode = FilterMode.Point;
 
         Graphics.Blit(source, resultTexture);
@@ -25,7 +27,8 @@ public class PixelationCamera : MonoBehaviour
 
     private void OnGUI()
     {
-        string text = $"Pixelate : {pixelate,3}";
+        if (!_showGUI) return;
+        string text = $"Pixelate : {_pixelate,3}";
 
         Rect textRect = new Rect(60f, 60f, 440f, 100f);
         Rect boxRect = new Rect(40f, 40f, 460f, 120f);
