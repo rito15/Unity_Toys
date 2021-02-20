@@ -16,17 +16,21 @@ namespace Rito
         {
             get
             {
-                if (_isBreathing == false)    // 체크 : 씬이 올바르게 활성화 되었는지 여부
+                // 체크 : 씬이 올바르게 활성화 되었는지 여부
+                if (_isBreathing == false) 
                     return null;
 
-                // Thread-safe
-                lock (_lock)
+                // Thread-safe : Double check locking
+                // 멀티스레딩 환경에서 다중 생성 방지
+                if (_instance == null)
                 {
-                    if (_instance == null)    // 체크 : 인스턴스가 없는 경우
-                        CheckExsistence();
-
-                    return _instance;
+                    lock (_lock)
+                    {
+                        if (_instance == null)
+                            CheckExsistence();
+                    }
                 }
+                return _instance;
             }
         }
 
