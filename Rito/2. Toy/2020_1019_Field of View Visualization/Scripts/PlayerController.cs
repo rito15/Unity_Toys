@@ -2,41 +2,44 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour
+namespace Rito
 {
-    public Camera _viewCam;
-
-    [Range(1f, 10f)]
-    public float _speed = 6f;
-
-    private Rigidbody _rb;
-
-    private float _h;
-    private float _v;
-    private Vector3 _velocity;
-
-    private void Awake()
+    public class PlayerController : MonoBehaviour
     {
-        Init();
-    }
+        public Camera _viewCam;
 
-    private void Update()
-    {
-        Vector3 mousePos = _viewCam.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, _viewCam.transform.position.y));
-        _h = Input.GetAxisRaw("Horizontal");
-        _v = Input.GetAxisRaw("Vertical");
+        [Range(1f, 10f)]
+        public float _speed = 6f;
 
-        transform.LookAt(mousePos);
-        _velocity = new Vector3(_h, 0f, _v);
+        private Rigidbody _rb;
 
-        _rb.MovePosition(_rb.position + _velocity * _speed * 0.05f);
-    }
+        private float _h;
+        private float _v;
+        private Vector3 _velocity;
 
-    private void Init()
-    {
-        TryGetComponent(out _rb);
+        private void Awake()
+        {
+            Init();
+        }
 
-        if (_viewCam == null)
-            _viewCam = Camera.main;
+        private void Update()
+        {
+            Vector3 mousePos = _viewCam.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, _viewCam.transform.position.y));
+            _h = Input.GetAxisRaw("Horizontal");
+            _v = Input.GetAxisRaw("Vertical");
+
+            transform.LookAt(mousePos);
+            _velocity = new Vector3(_h, 0f, _v);
+
+            _rb.MovePosition(_rb.position + _velocity * _speed * 0.05f);
+        }
+
+        private void Init()
+        {
+            TryGetComponent(out _rb);
+
+            if (_viewCam == null)
+                _viewCam = Camera.main;
+        }
     }
 }

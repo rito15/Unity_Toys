@@ -61,7 +61,7 @@ namespace Rito
 
         private static object _lock = new object();
 
-        // Check Validation(Scene)
+        // Validation Check (Scene)
         public static bool _isBreathing = true;
 
         #endregion // ==========================================================
