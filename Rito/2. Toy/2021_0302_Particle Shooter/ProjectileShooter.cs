@@ -29,7 +29,7 @@ namespace Rito
         [Range(1f, 20f)] public float _distanceFromCamera = 10f;
 
         [Range(0.01f, 1f)]
-        private float _clickInterval = 0.1f; // 클릭 허용 간격
+        public float _minClickInterval = 0.1f; // 클릭 허용 최소 간격
 
         #endregion
         /***********************************************************************
@@ -70,7 +70,7 @@ namespace Rito
             if (Input.GetMouseButton(0) || Input.GetMouseButton(1))
             {
                 StartCoroutine(ShootRoutine());
-                _currentClickInterval = _clickInterval;
+                _currentClickInterval = _minClickInterval;
             }
         }
 
@@ -128,15 +128,23 @@ namespace Rito
         #region .
         private Queue<GameObject> _poolQueue = new Queue<GameObject>();
         private GameObject _poolGo;
+        private int _maxCount = 0;
 
         private GameObject Spawn()
         {
             GameObject next;
 
             if (_poolQueue.Count == 0)
+            {
                 next = Instantiate(_projectilePrefab);
+                _maxCount++;
+            }
             else
+            {
                 next = _poolQueue.Dequeue();
+            }
+
+            UpdatePoolGoName();
 
             next.SetActive(true);
             next.transform.SetParent(_poolGo.transform);
@@ -148,6 +156,12 @@ namespace Rito
             go.SetActive(false);
             //go.transform.SetParent(_poolGo.transform);
             _poolQueue.Enqueue(go);
+            UpdatePoolGoName();
+        }
+
+        private void UpdatePoolGoName()
+        {
+            _poolGo.name = $"Projectile Pool [{_poolQueue.Count} / {_maxCount}]";
         }
 
         #endregion
