@@ -18,13 +18,16 @@ namespace Rito
     [InitializeOnLoad]
     public static class SceneAutoSaver
     {
-        public static bool Activated { get; set; } = false;
+        private const string Prefix = "SAS_";
+
+        public static bool Activated { get; set; }
+        public static bool ShowLog { get; set; }
         public static double SaveCycle
         {
             get => _saveCycle;
             set
             {
-                if(value < 10f) value = 10f;
+                if(value < 5f) value = 5f;
                 _saveCycle = value;
             }
         }
@@ -50,22 +53,41 @@ namespace Rito
                 EditorApplication.update += UpdateAutoSave;
 
             _lastSavedTime = LastSavedTimeForLog = DateTime.Now;
+
+            LoadOptions();
+        }
+
+        public static void SaveOptions()
+        {
+            EditorPrefs.SetBool(Prefix + nameof(Activated), Activated);
+            EditorPrefs.SetBool(Prefix + nameof(ShowLog), ShowLog);
+            EditorPrefs.SetFloat(Prefix + nameof(SaveCycle), (float)SaveCycle);
+        }
+
+        private static void LoadOptions()
+        {
+            Activated = EditorPrefs.GetBool(Prefix + nameof(Activated), true);
+            ShowLog   = EditorPrefs.GetBool(Prefix + nameof(ShowLog), true);
+            SaveCycle = EditorPrefs.GetFloat(Prefix + nameof(SaveCycle), 10f);
+
+            // 소수점 두자리 컷
+            SaveCycle = Math.Floor(SaveCycle * 100.0) * 0.01;
         }
         
         // 시간을 체크하여 자동 저장
         private static void UpdateAutoSave()
         {
-            if (!Activated || EditorApplication.isPlaying) return;
-            if (!EditorApplication.isSceneDirty)
+            DateTime dtNow = DateTime.Now;
+
+            if (!Activated || EditorApplication.isPlaying || !EditorApplication.isSceneDirty)
             {
-                _lastSavedTime = DateTime.Now;
+                _lastSavedTime = dtNow;
                 NextSaveRemaining = _saveCycle;
                 return;
             }
 
             // 시간 계산
-            DateTime dt = DateTime.Now;
-            double diff = dt.Subtract(_lastSavedTime).TotalSeconds;
+            double diff = dtNow.Subtract(_lastSavedTime).TotalSeconds;
 
             NextSaveRemaining = SaveCycle - diff;
             if(NextSaveRemaining < 0f) NextSaveRemaining = 0f;
@@ -74,9 +96,14 @@ namespace Rito
             if (diff > SaveCycle)
             {
                 //if(EditorApplication.isSceneDirty)
-                    EditorSceneManager.SaveOpenScenes();
+                EditorSceneManager.SaveOpenScenes();
+                _lastSavedTime = LastSavedTimeForLog = dtNow;
 
-                _lastSavedTime = LastSavedTimeForLog = DateTime.Now;
+                if (ShowLog)
+                {
+                    string dateStr = dtNow.ToString("yyyy-MM-dd  hh:mm:ss");
+                    UnityEngine.Debug.Log($"[Auto Save] {dateStr}");
+                }
             }
         }
     }

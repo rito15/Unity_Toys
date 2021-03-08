@@ -22,7 +22,7 @@ namespace Rito
             window.titleContent.text = "Scene Auto Saver";
 
             window.minSize = new Vector2(340f, 150f);
-            window.maxSize = new Vector2(340f, 150f);
+            window.maxSize = new Vector2(400f, 180f);
         }
 
         void OnGUI()
@@ -30,12 +30,15 @@ namespace Rito
             Color originColor = EditorStyles.boldLabel.normal.textColor;
             EditorStyles.boldLabel.normal.textColor = Color.yellow;
 
+            EditorGUI.BeginChangeCheck();
+
             // ============================================================================ Options ==
             GUILayout.Space(10f);
             GUILayout.Label("Options", EditorStyles.boldLabel);
 
             SceneAutoSaver.Activated = EditorGUILayout.Toggle("On", SceneAutoSaver.Activated);
-            SceneAutoSaver.SaveCycle = EditorGUILayout.DoubleField("Save Cycle", SceneAutoSaver.SaveCycle);
+            SceneAutoSaver.ShowLog = EditorGUILayout.Toggle("Show Log", SceneAutoSaver.ShowLog);
+            SceneAutoSaver.SaveCycle = EditorGUILayout.DoubleField("Save Cycle (sec)", SceneAutoSaver.SaveCycle);
 
             // ============================================================================ Logs ==
             GUILayout.Space(10f);
@@ -57,6 +60,11 @@ namespace Rito
 
             GUILayout.EndHorizontal();
             // ============================================================================
+
+            if (EditorGUI.EndChangeCheck())
+            {
+                SceneAutoSaver.SaveOptions();
+            }
 
             EditorStyles.boldLabel.normal.textColor = originColor;
         }
