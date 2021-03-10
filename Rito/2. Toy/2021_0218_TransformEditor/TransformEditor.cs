@@ -3,6 +3,8 @@
 using UnityEngine;
 using UnityEditor;
 
+#pragma warning disable CS0618 // Obsolete
+
 // 날짜 : 2021-02-17 02:06
 // 작성자 : Rito
 
@@ -12,7 +14,8 @@ namespace Rito
     public class TransformEditor : UnityEditor.Editor
     {
         private Transform transform;
-        private static bool advancedFoldOut;
+
+        private static bool globalFoldOut;
 
         private Texture refreshTexture;
         private string texturePath;
@@ -25,7 +28,7 @@ namespace Rito
         {
             transform = target as Transform;
 
-            texturePath = TransformEditorHelper.folderPath + @"\Refresh.png";
+            texturePath = TransformEditorHelper.FolderPath + @"\EditorResources\Refresh.png";
             refreshTexture = AssetDatabase.LoadAssetAtPath(texturePath, typeof(Texture2D)) as Texture2D;
 
             // 치트키 : 기존 TransformEditor로부터 RotationField 빌려쓰기
@@ -36,13 +39,40 @@ namespace Rito
                 _trguiOnEnableMethod = bunch.OnEnable;
                 _trguiRotationFieldMethod = bunch.RotationField;
             }
+
             _trguiOnEnableMethod.Invoke(_localRotationGUI, new object[] {
                 base.serializedObject.FindProperty("m_LocalRotation"), EditorGUIUtility.TrTextContent("Local Rotation")
             });
         }
-
+        /***********************************************************************
+        *                               Inspector Methods
+        ***********************************************************************/
+        #region .
         public override void OnInspectorGUI()
         {
+            // 1. Local Transform
+            DrawDefaultTransformInspector();
+
+            EditorGUILayout.Space();
+
+            // 2. Global Transform
+            EditorGUI.BeginChangeCheck();
+            if (globalFoldOut = EditorGUILayout.Foldout(globalFoldOut, "Global"))
+            {
+                DrawGlobalTransformInspector();
+                EditorGUILayout.Space();
+            }
+            if (EditorGUI.EndChangeCheck())
+            {
+                TransformEditorHelper.SaveGlobalFoldOutPref(globalFoldOut);
+            }
+
+            //base.serializedObject.ApplyModifiedProperties();
+        }
+
+        private void DrawDefaultTransformInspector()
+        {
+            // Reset Button
             Color oldBgColor = GUI.backgroundColor;
             Color oldTxtColor = GUI.contentColor;
             GUI.backgroundColor = Color.green;
@@ -57,42 +87,28 @@ namespace Rito
             GUI.backgroundColor = oldBgColor;
             GUI.contentColor = oldTxtColor;
 
-            base.serializedObject.Update();
-
-            DrawDefaultTransformInspector();
-
-            EditorGUILayout.Space();
-            if (advancedFoldOut = EditorGUILayout.Foldout(advancedFoldOut, "Advanced"))
-            {
-                DrawGlobalTransformValues();
-            }
-
-            base.serializedObject.ApplyModifiedProperties();
-        }
-
-        private void DrawDefaultTransformInspector()
-        {
+            //base.serializedObject.Update();
             // ==================================== Local Position =========================================
             EditorGUILayout.BeginHorizontal();
 
             Undo.RecordObject(transform, "Transform Local Position Changed");
+
+            if (globalFoldOut)
+                transform.localPosition = Vector3e4Round(transform.localPosition);
+
+            // Local Position Field
             transform.localPosition = EditorGUILayout.Vector3Field("Local Position", transform.localPosition);
-            transform.localPosition = Vector3E4Clamp(transform.localPosition);
 
-            Color oldBgColor = GUI.backgroundColor;
-            GUI.backgroundColor = Color.green;
-            if (GUILayout.Button(refreshTexture, GUILayout.Width(20f), GUILayout.Height(18f)))
-            {
-                transform.localPosition = Vector3.zero;
-            }
-            GUI.backgroundColor = oldBgColor;
+            // Refresh Button
+            DrawRefreshButton(Color.green, () => transform.localPosition = Vector3.zero);
+
             EditorGUILayout.EndHorizontal();
-
             // ==================================== Local Rotation =========================================
             EditorGUILayout.BeginHorizontal();
 
             Undo.RecordObject(transform, "Transform Local Rotation Changed");
 
+            // Local Rotation Field
             _trguiRotationFieldMethod.Invoke(_localRotationGUI, new object[] { });
 
             // 0~360 값 벗어나면 제한
@@ -103,35 +119,30 @@ namespace Rito
                 TransformUtils.SetInspectorRotation(transform, transform.localEulerAngles);
             }
 
-            oldBgColor = GUI.backgroundColor;
-            GUI.backgroundColor = Color.green;
-            if (GUILayout.Button(refreshTexture, GUILayout.Width(20f), GUILayout.Height(18f)))
-            {
-                TransformUtils.SetInspectorRotation(transform, Vector3.zero);
-            }
-            GUI.backgroundColor = oldBgColor;
+            // Refresh Button
+            DrawRefreshButton(Color.green, () => TransformUtils.SetInspectorRotation(transform, Vector3.zero));
 
             EditorGUILayout.EndHorizontal();
-
             // ==================================== Local Scale =========================================
             EditorGUILayout.BeginHorizontal();
 
             Undo.RecordObject(transform, "Transform Local Scale Changed");
-            transform.localScale = EditorGUILayout.Vector3Field("Local Scale", transform.localScale);
-            transform.localScale = Vector3E4Clamp(transform.localScale);
 
-            oldBgColor = GUI.backgroundColor;
-            GUI.backgroundColor = Color.green;
-            if (GUILayout.Button(refreshTexture, GUILayout.Width(20f), GUILayout.Height(18f)))
-            {
-                transform.localScale = Vector3.one;
-            }
-            GUI.backgroundColor = oldBgColor;
+            if (globalFoldOut)
+                transform.localScale = Vector3e4Round(transform.localScale);
+
+            // Local Scale Field
+            transform.localScale = EditorGUILayout.Vector3Field("Local Scale", transform.localScale);
+
+            // Refresh Button
+            DrawRefreshButton(Color.green, () => transform.localScale = Vector3.one);
+
             EditorGUILayout.EndHorizontal();
         }
 
-        private void DrawGlobalTransformValues()
+        private void DrawGlobalTransformInspector()
         {
+            // Reset Button
             Color oldBgColor = GUI.backgroundColor;
             Color oldTxtColor = GUI.contentColor;
             GUI.backgroundColor = Color.blue;
@@ -145,54 +156,63 @@ namespace Rito
             GUI.backgroundColor = oldBgColor;
             GUI.contentColor = oldTxtColor;
 
-
             // ==================================== Global Position =========================================
             EditorGUILayout.BeginHorizontal();
 
             Undo.RecordObject(transform, "Transform Global Position Changed");
-            transform.position = EditorGUILayout.Vector3Field("Global Position", transform.position);
+            transform.position = EditorGUILayout.Vector3Field("Global Position", Vector3e4Round(transform.position));
 
-            oldBgColor = GUI.backgroundColor;
-            GUI.backgroundColor = Color.blue;
-            if (GUILayout.Button(refreshTexture, GUILayout.Width(20f), GUILayout.Height(18f)))
-            {
-                transform.position = Vector3.zero;
-            }
-            GUI.backgroundColor = oldBgColor;
+            // Refresh Button
+            DrawRefreshButton(Color.blue, () => transform.position = Vector3.zero);
+
             EditorGUILayout.EndHorizontal();
 
             // ==================================== Global Rotation =========================================
             EditorGUILayout.BeginHorizontal();
 
             Undo.RecordObject(transform, "Transform Global Rotation Changed");
-            var globalRot = EditorGUILayout.Vector3Field("Global Rotation", transform.eulerAngles);
-            transform.eulerAngles = Vector3E4Clamp(globalRot);
 
-            oldBgColor = GUI.backgroundColor;
-            GUI.backgroundColor = Color.blue;
-            if (GUILayout.Button(refreshTexture, GUILayout.Width(20f), GUILayout.Height(18f)))
-            {
-                //transform.rotation = default; // 안됨. 아래처럼 해야 함
-                transform.eulerAngles = Vector3.zero;
-            }
-            GUI.backgroundColor = oldBgColor;
+            Vector3 globalRot = transform.eulerAngles;
+            globalRot = EditorGUILayout.Vector3Field("Global Rotation", Vector3e4Round(globalRot));
+
+            // 90 ~ 270 각도 건너뛰기
+            if (90f < globalRot.x && globalRot.x < 180f) globalRot.x += 180f;
+            else if (180 < globalRot.x && globalRot.x < 270f) globalRot.x -= 180f;
+
+            transform.eulerAngles = globalRot;//Vector3E4Round(globalRot);
+
+            // Refresh Button
+            DrawRefreshButton(Color.blue, () => transform.eulerAngles = Vector3.zero);
+
             EditorGUILayout.EndHorizontal();
-
             // ==================================== Global Scale =========================================
             EditorGUILayout.BeginHorizontal();
 
             Undo.RecordObject(transform, "Transform Global Scale Changed");
-            Vector3 changedGlobalScale = EditorGUILayout.Vector3Field("Global Scale", transform.lossyScale);
+            Vector3 changedGlobalScale = EditorGUILayout.Vector3Field("Global Scale", Vector3e4Round(transform.lossyScale));
             ChangeGlobalScale(changedGlobalScale);
 
-            oldBgColor = GUI.backgroundColor;
-            GUI.backgroundColor = Color.blue;
+            // Refresh Button
+            DrawRefreshButton(Color.blue, () => ChangeGlobalScale(Vector3.one));
+
+            EditorGUILayout.EndHorizontal();
+        }
+
+        #endregion
+        /***********************************************************************
+        *                               Private Methods
+        ***********************************************************************/
+        #region .
+        /// <summary> 버튼을 그립니당 </summary>
+        private void DrawRefreshButton(in Color color, System.Action action)
+        {
+            Color oldBgColor = GUI.backgroundColor;
+            GUI.backgroundColor = color;
             if (GUILayout.Button(refreshTexture, GUILayout.Width(20f), GUILayout.Height(18f)))
             {
-                ChangeGlobalScale(Vector3.one);
+                action();
             }
             GUI.backgroundColor = oldBgColor;
-            EditorGUILayout.EndHorizontal();
         }
 
         System.Collections.Generic.Queue<Vector3> _scaleHierarchy = new System.Collections.Generic.Queue<Vector3>();
@@ -218,13 +238,26 @@ namespace Rito
             transform.localScale = globalScale;
         }
 
-        private Vector3 Vector3E4Clamp(Vector3 vector)
+        /// <summary> 소수 4번째 자리까지 반올림 </summary>
+        private Vector3 Vector3e4Round(Vector3 vector)
         {
             vector.x = Mathf.Round(vector.x * 10000f) * 0.0001f;
             vector.y = Mathf.Round(vector.y * 10000f) * 0.0001f;
             vector.z = Mathf.Round(vector.z * 10000f) * 0.0001f;
             return vector;
         }
+
+        #endregion
+        /***********************************************************************
+        *                               Public Methods
+        ***********************************************************************/
+        #region .
+        public static void LoadGlobalFoldOutValue(bool value)
+        {
+            globalFoldOut = value;
+        }
+
+        #endregion
     }
 }
 #endif

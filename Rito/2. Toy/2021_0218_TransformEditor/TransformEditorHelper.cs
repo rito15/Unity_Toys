@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 using System.Linq;
 using System.Reflection;
 
@@ -12,21 +13,25 @@ using System.Reflection;
 
 namespace Rito
 {
+    [InitializeOnLoad]
     public static class TransformEditorHelper
     {
-        public static string folderPath;
+        public static string FolderPath { get; private set; }
         static TransformEditorHelper()
         {
-            GetFolderPath();
+            InitFolderPath();
+
+            // Load Adv Foldout Value
+            TransformEditor.LoadGlobalFoldOutValue(EditorPrefs.GetBool(GlobalPrefName, false));
         }
 
-        private static void GetFolderPath([System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "")
+        private static void InitFolderPath([System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "")
         {
-            folderPath = System.IO.Path.GetDirectoryName(sourceFilePath);
-            int rootIndex = folderPath.IndexOf(@"Assets\");
+            FolderPath = System.IO.Path.GetDirectoryName(sourceFilePath);
+            int rootIndex = FolderPath.IndexOf(@"Assets\");
             if (rootIndex > -1)
             {
-                folderPath = folderPath.Substring(rootIndex, folderPath.Length - rootIndex);
+                FolderPath = FolderPath.Substring(rootIndex, FolderPath.Length - rootIndex);
             }
         }
 
@@ -47,6 +52,15 @@ namespace Rito
 
             return (target, onEnableMethod, rotationFieldMethod);
         }
+        /***********************************************************************
+        *                               EditorPrefs
+        ***********************************************************************/
+        #region .
+        private const string GlobalPrefName = "TE_GlobalFoldOut";
+
+        public static void SaveGlobalFoldOutPref(bool value) => EditorPrefs.SetBool(GlobalPrefName, value);
+
+        #endregion
     }
 }
 

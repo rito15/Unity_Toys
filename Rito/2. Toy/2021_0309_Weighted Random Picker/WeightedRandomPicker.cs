@@ -23,6 +23,8 @@ using System.Collections.ObjectModel;
 
     - T GetRandomPick() : 현재 아이템 목록에서 가중치를 계산하여 랜덤으로 항목 하나를 뽑아온다.
     - T GetRandomPick(double) : 이미 계산된 확률 값을 매개변수로 넣어, 해당되는 항목 하나를 뽑아온다.
+    - double GetWeight(T) : 대상 아이템의 가중치를 얻어온다.
+    - double GetNormalizedWeight(T) : 대상 아이템의 정규화된 가중치를 얻어온다.
 
     - ReadonlyDictionary<T, double> GetItemDictReadonly() : 전체 아이템 목록을 읽기전용 컬렉션으로 받아온다.
     - ReadonlyDictionary<T, double> GetNormalizedItemDictReadonly()
