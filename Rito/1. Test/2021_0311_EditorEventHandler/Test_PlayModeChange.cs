@@ -1,3 +1,5 @@
+#if UNITY_EDITOR
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -19,3 +21,5 @@ public class Test_PlayModeChange : MonoBehaviour
         PlayModeStateChangeHandler.OnExitEditMode += () => Debug.Log("에디터모드 종료");
     }
 }
+
+#endif

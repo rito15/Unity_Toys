@@ -18,7 +18,7 @@ namespace Rito
 
         static PlayModeStateChangeHandler()
         {
-            EditorApplication.playModeStateChanged += OnPlaymodeStateChanged;
+            //EditorApplication.playModeStateChanged += OnPlaymodeStateChanged;
         }
         private static void OnPlaymodeStateChanged(PlayModeStateChange stateChange)
         {
