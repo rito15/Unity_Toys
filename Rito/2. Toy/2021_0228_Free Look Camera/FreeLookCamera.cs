@@ -9,6 +9,7 @@ using UnityEngine;
 namespace Rito
 {
     /// <summary> 자유 시점 카메라 </summary>
+    [DisallowMultipleComponent]
     public class FreeLookCamera : MonoBehaviour
     {
         /***********************************************************************
@@ -26,6 +27,8 @@ namespace Rito
         public KeyCode _moveBackward = KeyCode.S;
         public KeyCode _moveLeft = KeyCode.A;
         public KeyCode _moveRight = KeyCode.D;
+        public KeyCode _moveUp = KeyCode.E;
+        public KeyCode _moveDown = KeyCode.Q;
 
         [Space]
         public KeyCode _run = KeyCode.LeftShift;
@@ -61,7 +64,7 @@ namespace Rito
 
         private void Update()
         {
-            if(!_isActivated) return; // 기능 비활성화 상태에서는 모든 기능 정지
+            if (!_isActivated) return; // 기능 비활성화 상태에서는 모든 기능 정지
 
             CursorLock();
             if (_isCursorVisible) return; // 커서 보이는 상태에서는 이동, 회전 X
@@ -100,20 +103,19 @@ namespace Rito
         private void GetInputs()
         {
             // 1. Movement
-            float h = 0, v = 0;
+            _moveDir = new Vector3(0, 0, 0);
 
-            if(Input.GetKey(_moveForward))  v += 1f;
-            if(Input.GetKey(_moveBackward)) v -= 1f;
-            if(Input.GetKey(_moveLeft))  h -= 1f;
-            if(Input.GetKey(_moveRight)) h += 1f;
+            if (Input.GetKey(_moveForward)) _moveDir.z += 1f;
+            if (Input.GetKey(_moveBackward)) _moveDir.z -= 1f;
+            if (Input.GetKey(_moveRight)) _moveDir.x += 1f;
+            if (Input.GetKey(_moveLeft)) _moveDir.x -= 1f;
+            if (Input.GetKey(_moveUp)) _moveDir.y += 1f;
+            if (Input.GetKey(_moveDown)) _moveDir.y -= 1f;
 
             if (Input.GetKey(_run))
             {
-                h *= 2f;
-                v *= 2f;
+                _moveDir *= 2f;
             }
-
-            _moveDir = new Vector3(h, 0f, v);
 
             // 가속/감속
             if (_wheelAcceleration)
@@ -122,7 +124,7 @@ namespace Rito
                 if (wheel != 0)
                 {
                     _moveSpeed += wheel * 10f;
-                    if(_moveSpeed < 1f)
+                    if (_moveSpeed < 1f)
                         _moveSpeed = 1f;
                 }
             }
@@ -147,7 +149,7 @@ namespace Rito
 
         private void Rotate()
         {
-            if(_rotation == Vector2.zero) return;
+            if (_rotation == Vector2.zero) return;
 
             float rotSpeed = _rotationSpeed * _deltaTime * 50f;
 
@@ -157,7 +159,7 @@ namespace Rito
             // Rotate X(Up & Down)
             float nextX = trnEuler.x + _rotation.x * rotSpeed;
 
-            if(nextX > 180f) nextX -= 360f;
+            if (nextX > 180f) nextX -= 360f;
             nextX = Mathf.Clamp(nextX, -89.9f, 89.9f);
 
             transform.localEulerAngles = new Vector3(nextX, trnEuler.y, trnEuler.z);
@@ -169,7 +171,7 @@ namespace Rito
 
         private void Move()
         {
-            if(_moveDir == Vector3.zero) return;
+            if (_moveDir == Vector3.zero) return;
 
             _worldMoveDir = transform.TransformDirection(_moveDir);
             _rig.Translate(_worldMoveDir * _moveSpeed * Time.deltaTime, Space.World);
