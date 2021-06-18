@@ -5,6 +5,7 @@ Shader "Rito/PaintTexture"
 {
     Properties
     {
+        _Color ("Tint Color", Color) = (1, 1, 1, 1)
         _MainTex ("Main Texture", 2D) = "white" {}
         _PaintTex ("Painted Texture", 2D) = "black" {}
     }
@@ -19,6 +20,7 @@ Shader "Rito/PaintTexture"
 
         sampler2D _MainTex;
         sampler2D _PaintTex;
+        fixed4 _Color;
 
         struct Input
         {
@@ -35,7 +37,7 @@ Shader "Rito/PaintTexture"
         {
             //sampler2D paintTex = UNITY_ACCESS_INSTANCED_PROP(Props, _PaintTex);
 
-            fixed4 main = tex2D (_MainTex, IN.uv_MainTex);
+            fixed4 main = tex2D (_MainTex, IN.uv_MainTex) * _Color;
             fixed4 painted = tex2D (_PaintTex, IN.uv_MainTex);
 
             o.Emission = lerp(main.rgb, painted.rgb, painted.a);

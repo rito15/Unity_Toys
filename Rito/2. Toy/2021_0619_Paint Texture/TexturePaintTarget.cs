@@ -19,6 +19,7 @@ namespace Rito.TexturePainter
     /// <summary> 
     /// 그림 그려질 대상
     /// </summary>
+    [DisallowMultipleComponent]
     public class TexturePaintTarget : MonoBehaviour
     {
         /***********************************************************************

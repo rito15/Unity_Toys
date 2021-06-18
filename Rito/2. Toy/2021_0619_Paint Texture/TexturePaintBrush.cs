@@ -11,6 +11,7 @@ using UnityEngine;
 namespace Rito.TexturePainter
 {
     /// <summary> 마우스 드래그로 텍스쳐에 그림 그리기 </summary>
+    [DisallowMultipleComponent]
     public class TexturePaintBrush : MonoBehaviour
     {
         /***********************************************************************
@@ -74,8 +75,8 @@ namespace Rito.TexturePainter
                     {
                         sameUvPoint = hit.lightmapCoord;
                         Vector2 pixelUV = hit.lightmapCoord;
-                        pixelUV.y *= paintTarget.resolution;
                         pixelUV.x *= paintTarget.resolution;
+                        pixelUV.y *= paintTarget.resolution;
                         paintTarget.DrawTexture(pixelUV.x, pixelUV.y, brushSize, CopiedBrushTexture);
                     }
                 }
