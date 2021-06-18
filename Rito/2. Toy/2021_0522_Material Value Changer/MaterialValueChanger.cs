@@ -19,9 +19,7 @@ namespace Rito
 
         private abstract class PropertyData<T> where T : struct
         {
-            public string name; 
-            public int index;   // 해당 프로퍼티의 쉐이더 내 인덱스
-
+            public string Name => _name;
             public T Value => _value;
             public T MinValue
             {
@@ -58,14 +56,14 @@ namespace Rito
             protected T _maxValue;
             protected T _deltaCoef; // 매 프레임 더할 값
 
+            protected string _name;
             protected int _direction = 1;   // 값 변화 방향 및 크기
             protected float _duration = 1f;
             protected float _progress = 0f;
 
-            public void SetNewProperty(string name, int index, float duration)
+            public void SetNewProperty(string name, float duration)
             {
-                this.name = name;
-                this.index = index;
+                this._name = name;
                 this._duration = duration;
             }
 
@@ -85,6 +83,7 @@ namespace Rito
                 if(!InRange(_progress, 0f, _duration)) return;
 
                 _progress += deltaTime * _direction;
+
                 if (_progress < 0) _progress = 0;
                 else if(_progress > _duration) _progress = _duration;
 
@@ -125,9 +124,9 @@ namespace Rito
         [Serializable]
         private class FloatPropertyData : PropertyData<float>
         {
-            public FloatPropertyData(string name, int index, float duration)
+            public FloatPropertyData(string name, float duration = 1f)
             {
-                SetNewProperty(name, index, duration);
+                SetNewProperty(name, duration);
                 SetValues(0f, 0f, 1f);
             }
 
@@ -140,9 +139,9 @@ namespace Rito
         [Serializable]
         private class Vector4PropertyData : PropertyData<Vector4>
         {
-            public Vector4PropertyData(string name, int index, float duration)
+            public Vector4PropertyData(string name, float duration = 1f)
             {
-                SetNewProperty(name, index, duration);
+                SetNewProperty(name, duration);
                 SetValues(Vector4.zero, Vector4.zero, Vector4.one);
             }
 
@@ -155,9 +154,9 @@ namespace Rito
         [Serializable]
         private class ColorPropertyData : PropertyData<Color>
         {
-            public ColorPropertyData(string name, int index, float duration)
+            public ColorPropertyData(string name, float duration = 1f)
             {
-                SetNewProperty(name, index, duration);
+                SetNewProperty(name, duration);
                 SetValues(Color.black, Color.white, Color.white);
             }
 
@@ -168,24 +167,69 @@ namespace Rito
         }
 
         #endregion
+        /***********************************************************************
+        *                               Property List
+        ***********************************************************************/
+        #region .
+        private readonly struct PropertyInfo
+        {
+            public readonly string name;
+            public readonly ShaderPropertyType type;
 
+            public PropertyInfo(string name, ShaderPropertyType type)
+            {
+                this.name = name;
+                this.type = type;
+            }
+        }
+        private readonly struct PropertyIndex
+        {
+            public readonly string name;
+            public readonly ShaderPropertyType type;
+            public readonly int index;
+
+            public PropertyIndex(string name, ShaderPropertyType type, int index)
+            {
+                this.name = name;
+                this.type = type;
+                this.index = index;
+            }
+        }
+
+        private readonly List<PropertyInfo> propertyInfoList = new List<PropertyInfo>(10);
+        private string[] propertyNameArray;
+        //private readonly Dictionary<string, int> propertyIndexDict = new Dictionary<string, int>();
+
+        // Inspector Property List
+        private readonly List<PropertyIndex> inspectorPropertyList = new List<PropertyIndex>();
+
+        #endregion
+        /***********************************************************************
+        *                               Fields
+        ***********************************************************************/
+        #region .
         [SerializeField] private MeshRenderer mr;
         [SerializeField] private List<FloatPropertyData> floatPropList = new List<FloatPropertyData>();
         [SerializeField] private List<Vector4PropertyData> vec4PropList = new List<Vector4PropertyData>();
         [SerializeField] private List<ColorPropertyData> colorPropList = new List<ColorPropertyData>();
 
-        // (프로퍼티 타입, 해당 타입 리스트 내부의 인덱스)
-        private List<(ShaderPropertyType propType, int index)> propertyList
-            = new List<(ShaderPropertyType propType, int index)>();
 
         private Shader shader;
+        private MaterialPropertyBlock mpBlock;
 
-        private void Start()
+        #endregion
+        /***********************************************************************
+        *                               Private Methods
+        ***********************************************************************/
+        #region .
+
+        private void MakePropertyList()
         {
-            shader = mr.sharedMaterial.shader;
+            propertyInfoList.Clear();
+            //propertyIndexDict.Clear();
+
             int propertyCount = shader.GetPropertyCount();
 
-            int j = 0;
             for (int i = 0; i < propertyCount; i++)
             {
                 var pType = shader.GetPropertyType(i);
@@ -201,13 +245,44 @@ namespace Rito
                         continue;
                 }
 
-                string str = $"[{j++}] ";
-                str += shader.GetPropertyName(i);
-                str += ": ";
-                str += pType.ToString();
-                
-                Debug.Log(str);
+                propertyInfoList.Add(new PropertyInfo(shader.GetPropertyName(i), pType));
+            }
+
+            int len = propertyInfoList.Count;
+            propertyNameArray = new string[len];
+            for (int i = 0; i < len; i++)
+            {
+                propertyNameArray[i] = propertyInfoList[i].name;
             }
         }
+        private void Init()
+        {
+            TryGetComponent(out mr);
+            shader = mr.sharedMaterial.shader;
+        }
+
+        #endregion
+        /***********************************************************************
+        *                               Unity Events
+        ***********************************************************************/
+        #region .
+
+        private void Reset()
+        {
+            propertyInfoList.Clear();
+            inspectorPropertyList.Clear();
+            floatPropList.Clear();
+            vec4PropList.Clear();
+            colorPropList.Clear();
+
+            Init();
+            MakePropertyList();
+        }
+        private void Awake()
+        {
+            mpBlock = new MaterialPropertyBlock();
+        }
+
+        #endregion
     }
 }
