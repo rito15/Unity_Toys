@@ -75,8 +75,7 @@ namespace Rito.TexturePainter
                     {
                         sameUvPoint = hit.lightmapCoord;
                         Vector2 pixelUV = hit.lightmapCoord;
-                        pixelUV.x *= paintTarget.resolution;
-                        pixelUV.y *= paintTarget.resolution;
+                        pixelUV *= paintTarget.resolution;
                         paintTarget.DrawTexture(pixelUV.x, pixelUV.y, brushSize, CopiedBrushTexture);
                     }
                 }
