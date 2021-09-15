@@ -9,7 +9,7 @@ using System;
 namespace Rito
 {
     /// <summary> 
-    /// 파티클 - 바닥에 
+    /// 파티클 - 바닥에 눈 쌓기
     /// </summary>
     public class FallingSnow : MonoBehaviour
     {
@@ -33,7 +33,7 @@ namespace Rito
                 snowPainter = other.GetComponent<GroundSnowPainter>();
             }
 
-            if (snowPainter == null)
+            if (snowPainter == null || snowPainter.isActiveAndEnabled == false)
                 return;
 
             int numColEvents = ps.GetCollisionEvents(other, colEventList);

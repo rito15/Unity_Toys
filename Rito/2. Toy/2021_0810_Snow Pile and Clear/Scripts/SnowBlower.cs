@@ -19,7 +19,7 @@ namespace Rito
 
         private void Update()
         {
-            if (!eraseOn) return;
+            if (!eraseOn || groundSnow == null || groundSnow.isActiveAndEnabled == false) return;
 
             groundSnow.ClearSnow(transform.position, sizeMultiplier * transform.lossyScale.x);
         }

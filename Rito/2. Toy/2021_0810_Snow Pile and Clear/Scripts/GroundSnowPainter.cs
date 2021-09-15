@@ -28,35 +28,38 @@ namespace Rito
         [SerializeField] // 인스펙터 확인용
         private RenderTexture snowRenderTexture; // 브러시로 그려질 대상 렌더 텍스쳐
 
-        private const int Resolution = 1024;
-
-        //[SerializeField] // 인스펙터 확인용
         private Texture2D whiteBrushTexture; // Painter
         private Texture2D blackBrushTexture; // Eraser
 
+        private const int Resolution = 1024;
+
         private void Awake()
         {
-            Init();
+            snowRenderTexture = new RenderTexture(Resolution, Resolution, 0);
+            snowRenderTexture.filterMode = FilterMode.Point;
+            snowRenderTexture.Create();
+
+            targetMaterial.mainTexture = snowRenderTexture;
+
             whiteBrushTexture = CreateBrushTexture(Color.white, pileBrushIntensity);
             blackBrushTexture = CreateBrushTexture(Color.black, eraserBrushIntensity);
         }
 
-        private void Init()
+        private void OnApplicationQuit()
         {
-            snowRenderTexture = new RenderTexture(Resolution, Resolution, 0);
-            snowRenderTexture.filterMode = FilterMode.Point;
-            targetMaterial.mainTexture = snowRenderTexture;
+            if(snowRenderTexture) Destroy(snowRenderTexture);
+            if(whiteBrushTexture) Destroy(whiteBrushTexture);
+            if(blackBrushTexture) Destroy(blackBrushTexture);
         }
 
         private Texture2D CreateBrushTexture(Color color, float intensity)
         {
-            int res = 512;
+            int res = Resolution / 2;
             float hRes = res * 0.5f;
             float sqrSize = hRes * hRes;
 
             Texture2D texture = new Texture2D(res, res);
-            texture.filterMode = FilterMode.Point;
-            texture.alphaIsTransparency = true;
+            texture.filterMode = FilterMode.Bilinear;
 
             for (int y = 0; y < res; y++)
             {
@@ -66,9 +69,8 @@ namespace Rito
                     float sqrLen = (hRes - x) * (hRes - x) + (hRes - y) * (hRes - y);
                     float alpha = Mathf.Max(sqrSize - sqrLen, 0f) / sqrSize;
 
-                    // Blur
-                    //alpha = Mathf.Pow(alpha, 2f);
-                    //alpha = Mathf.Sqrt(alpha);
+                    // Soft
+                    alpha = Mathf.Pow(alpha, 2f);
 
                     color.a = alpha * intensity;
                     texture.SetPixel(x, y, color);
@@ -109,17 +111,17 @@ namespace Rito
         public void PileSnow(Vector3 contactPoint)
         {
             float snowSize = UnityEngine.Random.Range(0.5f, 2.0f);
-            Contact(contactPoint, snowSize, true);
+            Paint(contactPoint, snowSize, true);
         }
 
         /// <summary> 눈 지우기 </summary>
         public void ClearSnow(Vector3 contactPoint, float size)
         {
-            Contact(contactPoint, size, false);
+            Paint(contactPoint, size, false);
         }
 
         /// <summary> 눈 쌓기 or 지우기 </summary>
-        private void Contact(in Vector3 contactPoint, float size = 1f, bool pileOrClear = true)
+        private void Paint(in Vector3 contactPoint, float size = 1f, bool pileOrClear = true)
         {
             // 눈이 부딪힌 3D 좌표로부터 2D UV 좌표 계산
             // Plane은 scale 1당 좌표 10이므로 10으로 나누기
@@ -145,8 +147,6 @@ namespace Rito
             {
                 PaintBrush(blackBrushTexture, uv, size);
             }
-
-            //Debug.Log(uv);
         }
     }
 }
