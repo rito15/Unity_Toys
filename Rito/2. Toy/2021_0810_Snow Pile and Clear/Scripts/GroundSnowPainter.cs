@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using System;
 
 // 날짜 : 2021-08-10 PM 8:47:57
 // 작성자 : Rito
@@ -23,7 +20,7 @@ namespace Rito
         private float pileBrushIntensity = 0.1f;
 
         [SerializeField, Range(0.01f, 1f)]
-        private float eraserBrushIntensity = 0.5f;
+        private float eraserBrushIntensity = 0.1f;
 
         [SerializeField] // 인스펙터 확인용
         private RenderTexture snowRenderTexture; // 브러시로 그려질 대상 렌더 텍스쳐
@@ -45,7 +42,7 @@ namespace Rito
             blackBrushTexture = CreateBrushTexture(Color.black, eraserBrushIntensity);
         }
 
-        private void OnApplicationQuit()
+        private void OnDestroy()
         {
             if(snowRenderTexture) Destroy(snowRenderTexture);
             if(whiteBrushTexture) Destroy(whiteBrushTexture);

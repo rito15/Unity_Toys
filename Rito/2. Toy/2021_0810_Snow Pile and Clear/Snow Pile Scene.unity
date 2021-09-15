@@ -5077,7 +5077,7 @@ GameObject:
   - component: {fileID: 2020578725}
   - component: {fileID: 2020578729}
   m_Layer: 0
-  m_Name: Snow Blower
+  m_Name: Snow Eraser
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5172,6 +5172,8 @@ MonoBehaviour:
   groundSnow: {fileID: 2068544555}
   sizeMultiplier: 0.5
   eraseOn: 1
+  moveSpeed: 5
+  currentSpeed: 0
 --- !u!1 &2068544550
 GameObject:
   m_ObjectHideFlags: 0
